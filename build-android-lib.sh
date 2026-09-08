@@ -122,10 +122,19 @@ ensure_gomobile_tools
 
 # Явно переопределяем ANDROID_NDK_HOME чтобы избежать использования системной версии
 # Это критично для GitHub Actions runner, где ANDROID_NDK_HOME может указывать на NDK 27
-export ANDROID_NDK_HOME="${ANDROID_NDK_HOME:-${ANDROID_HOME}/ndk/23.1.7779620}"
+# Всегда используем нашу версию, игнорируя системную переменную
+export ANDROID_NDK_HOME="${ANDROID_HOME}/ndk/23.1.7779620"
 export ANDROID_API_LEVEL=21
 echo "Using ANDROID_NDK_HOME: ${ANDROID_NDK_HOME}"
 echo "Using ANDROID_API_LEVEL: ${ANDROID_API_LEVEL}"
+
+# Проверяем, что NDK существует
+if [ ! -d "${ANDROID_NDK_HOME}" ]; then
+    echo "ERROR: NDK not found at ${ANDROID_NDK_HOME}"
+    echo "Available NDKs:"
+    ls -la "${ANDROID_HOME}/ndk/" 2>/dev/null || true
+    exit 1
+fi
 
 CGO_ENABLED=0 gomobile bind \
   -o "$app_path/gomobile/netbird.aar" \
