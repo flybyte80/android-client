@@ -1,9 +1,9 @@
 name: Android CI
 on:
   push:
-    branches: [ "split_tunnel" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "split_tunnel" ]
+    branches: [ "main" ]
 jobs:
   build:
     runs-on: ubuntu-latest
