@@ -37,4 +37,4 @@ jobs:
         run: ./build-android-lib.sh
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew assembleDebug
