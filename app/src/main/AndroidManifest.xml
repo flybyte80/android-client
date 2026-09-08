@@ -18,6 +18,20 @@
         android:name="android.hardware.touchscreen"
         android:required="false" />
 
+    <queries>
+        <!-- Apps with launcher icons - what users typically want to select -->
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+
+        <!-- Browser apps (common split-tunneling target) -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
     <application
         android:name=".MyApplication"
         android:allowBackup="false"
