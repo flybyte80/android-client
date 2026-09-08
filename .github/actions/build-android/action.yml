@@ -121,6 +121,26 @@ runs:
         go install "golang.org/x/mobile/cmd/gomobile@$version"
         go install "golang.org/x/mobile/cmd/gobind@$version"
 
+    - name: Fix NDK for gomobile
+      shell: bash
+      run: |
+        # Создаем конфиг для gomobile
+        mkdir -p ~/.gomobile
+        cat > ~/.gomobile/env << EOF
+        ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/23.1.7779620
+        ANDROID_API=21
+        GOANDROID_API_LEVEL=21
+        EOF
+        
+        # Экспортируем переменные для текущей сессии
+        echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/23.1.7779620" >> $GITHUB_ENV
+        echo "GOANDROID_API_LEVEL=21" >> $GITHUB_ENV
+        echo "ANDROID_API=21" >> $GITHUB_ENV
+        
+        # Проверяем
+        echo "NDK set to: ${ANDROID_HOME}/ndk/23.1.7779620"
+        ls -la ${ANDROID_HOME}/ndk/23.1.7779620/platforms/ || true
+
     - name: Build NetBird Go library
       shell: bash
       run: PATH=$PATH:$(go env GOPATH)/bin bash -x build-android-lib.sh
