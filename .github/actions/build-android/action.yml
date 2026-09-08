@@ -78,7 +78,11 @@ runs:
 
     - name: Set ANDROID_NDK_HOME
       shell: bash
-      run: echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/23.1.7779620" >> $GITHUB_ENV
+      run: |
+        # Переопределяем системную ANDROID_NDK_HOME runner'а
+        echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/23.1.7779620" >> $GITHUB_ENV
+        # Также устанавливаем для текущей сессии
+        export ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/23.1.7779620
 
     # gomobile bind shells out to gobind, and gobind is the tool that actually
     # generates the Java bindings and the JNI glue. Caching and installing only
@@ -124,26 +128,33 @@ runs:
     - name: Fix NDK for gomobile
       shell: bash
       run: |
+        # Явно переопределяем ANDROID_NDK_HOME для gomobile
+        # Это важно потому что gomobile читает переменную из окружения, а не из GITHUB_ENV
+        export ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/23.1.7779620
+        export ANDROID_API_LEVEL=21
+        
         # Создаем конфиг для gomobile
         mkdir -p ~/.gomobile
         cat > ~/.gomobile/env << EOF
         ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/23.1.7779620
-        ANDROID_API=21
-        GOANDROID_API_LEVEL=21
+        ANDROID_API_LEVEL=21
         EOF
         
-        # Экспортируем переменные для текущей сессии
-        echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/23.1.7779620" >> $GITHUB_ENV
-        echo "GOANDROID_API_LEVEL=21" >> $GITHUB_ENV
-        echo "ANDROID_API=21" >> $GITHUB_ENV
-        
         # Проверяем
-        echo "NDK set to: ${ANDROID_HOME}/ndk/23.1.7779620"
-        ls -la ${ANDROID_HOME}/ndk/23.1.7779620/platforms/ || true
+        echo "NDK set to: ${ANDROID_NDK_HOME}"
+        ls -la ${ANDROID_NDK_HOME}/platforms/ || true
+        
+        # Проверяем версию NDK
+        echo "Checking NDK version:"
+        cat ${ANDROID_NDK_HOME}/source.properties || true
 
     - name: Build NetBird Go library
       shell: bash
-      run: PATH=$PATH:$(go env GOPATH)/bin bash -x build-android-lib.sh
+      run: |
+        # Явно устанавливаем ANDROID_NDK_HOME перед запуском сборки
+        export ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/23.1.7779620
+        export ANDROID_API_LEVEL=21
+        PATH=$PATH:$(go env GOPATH)/bin bash -x build-android-lib.sh
 
     - name: Build APK and Bundle
       shell: bash
